@@ -10,147 +10,147 @@ class TestMultiInstanceConfiguration:
     def test_parse_maxcompute_multi_instance(self):
         """Test parsing MaxCompute multi-instance configuration."""
         env_vars = {
-            "MAXCOMPUTE_HK_BDW_TYPE": "MAXCOMPUTE",
-            "MAXCOMPUTE_HK_BDW_PROJECT": "bit_data_warehouse",
-            "MAXCOMPUTE_HK_BDW_ACCESSID": "test_id",
-            "MAXCOMPUTE_HK_BDW_ACCESSKEY": "test_key",
-            "MAXCOMPUTE_HK_BDW_ENDPOINT": "http://service.cn-hongkong.maxcompute.aliyun.com/api",
+            "MAXCOMPUTE_REGION1_PROJECT1_TYPE": "MAXCOMPUTE",
+            "MAXCOMPUTE_REGION1_PROJECT1_PROJECT": "test_project",
+            "MAXCOMPUTE_REGION1_PROJECT1_ACCESSID": "test_id",
+            "MAXCOMPUTE_REGION1_PROJECT1_ACCESSKEY": "test_key",
+            "MAXCOMPUTE_REGION1_PROJECT1_ENDPOINT": "http://service.test-region.maxcompute.aliyun.com/api",
         }
 
         with patch.dict("os.environ", env_vars, clear=True):
             manager = ConnectionManager()
             configs = manager._parse_multi_instance_configs()
             
-            assert "maxcompute_hk_bdw" in configs
-            config = configs["maxcompute_hk_bdw"]
+            assert "maxcompute_region1_project1" in configs
+            config = configs["maxcompute_region1_project1"]
             assert config["TYPE"] == "MAXCOMPUTE"
-            assert config["PROJECT"] == "bit_data_warehouse"
+            assert config["PROJECT"] == "test_project"
             assert config["ACCESSID"] == "test_id"
 
     def test_parse_dataworks_multi_instance(self):
         """Test parsing DataWorks multi-instance configuration."""
         env_vars = {
-            "DATAWORKS_EU_AVBU_TYPE": "DATAWORKS",
-            "DATAWORKS_EU_AVBU_PROJECT": "avbu",
-            "DATAWORKS_EU_AVBU_ACCESSID": "test_id",
-            "DATAWORKS_EU_AVBU_ACCESSKEY": "test_key",
-            "DATAWORKS_EU_AVBU_ENDPOINT": "http://service.eu-central-1.maxcompute.aliyun.com/api",
+            "DATAWORKS_REGION2_PROJECT2_TYPE": "DATAWORKS",
+            "DATAWORKS_REGION2_PROJECT2_PROJECT": "test_project",
+            "DATAWORKS_REGION2_PROJECT2_ACCESSID": "test_id",
+            "DATAWORKS_REGION2_PROJECT2_ACCESSKEY": "test_key",
+            "DATAWORKS_REGION2_PROJECT2_ENDPOINT": "http://service.test-region.maxcompute.aliyun.com/api",
         }
 
         with patch.dict("os.environ", env_vars, clear=True):
             manager = ConnectionManager()
             configs = manager._parse_multi_instance_configs()
             
-            assert "dataworks_eu_avbu" in configs
-            config = configs["dataworks_eu_avbu"]
+            assert "dataworks_region2_project2" in configs
+            config = configs["dataworks_region2_project2"]
             assert config["TYPE"] == "DATAWORKS"
 
     def test_parse_hologres_multi_instance(self):
         """Test parsing Hologres multi-instance configuration."""
         env_vars = {
-            "HOLO_HK_CHATBI_TYPE": "HOLOGRES",
-            "HOLO_HK_CHATBI_HOST": "hgpostcn-cn-11-cn-hongkong.hologres.aliyuncs.com",
-            "HOLO_HK_CHATBI_USER": "BASIC$chatbi",
-            "HOLO_HK_CHATBI_PASSWORD": "test_pass",
-            "HOLO_HK_CHATBI_DBNAME": "chatbi",
-            "HOLO_HK_CHATBI_PORT": "80",
+            "HOLO_REGION1_DB1_TYPE": "HOLOGRES",
+            "HOLO_REGION1_DB1_HOST": "test-instance.hologres.aliyuncs.com",
+            "HOLO_REGION1_DB1_USER": "test_user",
+            "HOLO_REGION1_DB1_PASSWORD": "test_pass",
+            "HOLO_REGION1_DB1_DBNAME": "test_db",
+            "HOLO_REGION1_DB1_PORT": "80",
         }
 
         with patch.dict("os.environ", env_vars, clear=True):
             manager = ConnectionManager()
             configs = manager._parse_multi_instance_configs()
             
-            assert "holo_hk_chatbi" in configs
-            config = configs["holo_hk_chatbi"]
+            assert "holo_region1_db1" in configs
+            config = configs["holo_region1_db1"]
             assert config["TYPE"] == "HOLOGRES"
-            assert config["HOST"] == "hgpostcn-cn-11-cn-hongkong.hologres.aliyuncs.com"
+            assert config["HOST"] == "test-instance.hologres.aliyuncs.com"
 
     def test_parse_mysql_multi_instance(self):
         """Test parsing MySQL multi-instance configuration."""
         env_vars = {
-            "MYSQL_CN_ANTIGRAVITY_TYPE": "MySQL",
-            "MYSQL_CN_ANTIGRAVITY_HOST": "111.rwlb.rds.aliyuncs.com",
-            "MYSQL_CN_ANTIGRAVITY_USER": "bi_ro",
-            "MYSQL_CN_ANTIGRAVITY_PASSWORD": "test_pass",
-            "MYSQL_CN_ANTIGRAVITY_DB": "antigravity_prod",
+            "MYSQL_REGION1_DB1_TYPE": "MySQL",
+            "MYSQL_REGION1_DB1_HOST": "test-instance.rds.aliyuncs.com",
+            "MYSQL_REGION1_DB1_USER": "test_user",
+            "MYSQL_REGION1_DB1_PASSWORD": "test_pass",
+            "MYSQL_REGION1_DB1_DB": "test_db",
         }
 
         with patch.dict("os.environ", env_vars, clear=True):
             manager = ConnectionManager()
             configs = manager._parse_multi_instance_configs()
             
-            assert "mysql_cn_antigravity" in configs
-            config = configs["mysql_cn_antigravity"]
+            assert "mysql_region1_db1" in configs
+            config = configs["mysql_region1_db1"]
             assert config["TYPE"] == "MySQL"
 
     def test_parse_polardb_multi_instance(self):
         """Test parsing PolarDB multi-instance configuration."""
         env_vars = {
-            "POLARDB_CN_INSTA360_TYPE": "POLARDB",
-            "POLARDB_CN_INSTA360_HOST": "pc-111.rwlb.rds.aliyuncs.com",
-            "POLARDB_CN_INSTA360_USER": "test_user",
-            "POLARDB_CN_INSTA360_PASSWORD": "test_pass",
-            "POLARDB_CN_INSTA360_DB": "insta360_data_collection",
+            "POLARDB_REGION1_DB1_TYPE": "POLARDB",
+            "POLARDB_REGION1_DB1_HOST": "test-instance.rwlb.rds.aliyuncs.com",
+            "POLARDB_REGION1_DB1_USER": "test_user",
+            "POLARDB_REGION1_DB1_PASSWORD": "test_pass",
+            "POLARDB_REGION1_DB1_DB": "test_db",
         }
 
         with patch.dict("os.environ", env_vars, clear=True):
             manager = ConnectionManager()
             configs = manager._parse_multi_instance_configs()
             
-            assert "polardb_cn_insta360" in configs
-            config = configs["polardb_cn_insta360"]
+            assert "polardb_region1_db1" in configs
+            config = configs["polardb_region1_db1"]
             assert config["TYPE"] == "POLARDB"
 
     def test_parse_redshift_multi_instance(self):
         """Test parsing Redshift multi-instance configuration."""
         env_vars = {
-            "REDSHIFT_EU_AVBU_TYPE": "REDSHIFT",
-            "REDSHIFT_EU_AVBU_HOST": "default-workgroup.111.eu-central-1.redshift-serverless.amazonaws.com",
-            "REDSHIFT_EU_AVBU_PORT": "5439",
-            "REDSHIFT_EU_AVBU_DB": "avbu",
-            "REDSHIFT_EU_AVBU_USER": "admin",
-            "REDSHIFT_EU_AVBU_PASSWORD": "test_pass",
+            "REDSHIFT_REGION1_CLUSTER1_TYPE": "REDSHIFT",
+            "REDSHIFT_REGION1_CLUSTER1_HOST": "test-workgroup.test-region.redshift-serverless.amazonaws.com",
+            "REDSHIFT_REGION1_CLUSTER1_PORT": "5439",
+            "REDSHIFT_REGION1_CLUSTER1_DB": "test_db",
+            "REDSHIFT_REGION1_CLUSTER1_USER": "test_user",
+            "REDSHIFT_REGION1_CLUSTER1_PASSWORD": "test_pass",
         }
 
         with patch.dict("os.environ", env_vars, clear=True):
             manager = ConnectionManager()
             configs = manager._parse_multi_instance_configs()
             
-            assert "redshift_eu_avbu" in configs
-            config = configs["redshift_eu_avbu"]
+            assert "redshift_region1_cluster1" in configs
+            config = configs["redshift_region1_cluster1"]
             assert config["TYPE"] == "REDSHIFT"
 
     def test_build_maxcompute_connection_string(self):
         """Test building MaxCompute connection string."""
         config = {
             "TYPE": "MAXCOMPUTE",
-            "PROJECT": "bit_data_warehouse",
+            "PROJECT": "test_project",
             "ACCESSID": "test_id",
             "ACCESSKEY": "test_key",
-            "ENDPOINT": "http://service.cn-hongkong.maxcompute.aliyun.com/api",
+            "ENDPOINT": "http://service.test-region.maxcompute.aliyun.com/api",
         }
 
         manager = ConnectionManager()
-        conn_string = manager._build_connection_string("maxcompute_hk_bdw", config)
+        conn_string = manager._build_connection_string("test_instance", config)
         
         assert conn_string is not None
         assert conn_string.startswith("maxcompute://")
         assert "test_id" in conn_string
         assert "test_key" in conn_string
-        assert "bit_data_warehouse" in conn_string
+        assert "test_project" in conn_string
 
     def test_build_dataworks_connection_string(self):
         """Test building DataWorks connection string (maps to MaxCompute)."""
         config = {
             "TYPE": "DATAWORKS",
-            "PROJECT": "avbu",
+            "PROJECT": "test_project",
             "ACCESSID": "test_id",
             "ACCESSKEY": "test_key",
-            "ENDPOINT": "http://service.eu-central-1.maxcompute.aliyun.com/api",
+            "ENDPOINT": "http://service.test-region.maxcompute.aliyun.com/api",
         }
 
         manager = ConnectionManager()
-        conn_string = manager._build_connection_string("dataworks_eu_avbu", config)
+        conn_string = manager._build_connection_string("test_instance", config)
         
         assert conn_string is not None
         assert conn_string.startswith("maxcompute://")
@@ -159,49 +159,49 @@ class TestMultiInstanceConfiguration:
         """Test building Hologres connection string."""
         config = {
             "TYPE": "HOLOGRES",
-            "HOST": "hgpostcn-cn-11-cn-hongkong.hologres.aliyuncs.com",
-            "USER": "BASIC$chatbi",
+            "HOST": "test-instance.hologres.aliyuncs.com",
+            "USER": "test_user",
             "PASSWORD": "test_pass",
-            "DBNAME": "chatbi",
+            "DBNAME": "test_db",
             "PORT": "80",
         }
 
         manager = ConnectionManager()
-        conn_string = manager._build_connection_string("holo_hk_chatbi", config)
+        conn_string = manager._build_connection_string("test_instance", config)
         
         assert conn_string is not None
         assert conn_string.startswith("postgresql://")
-        assert "chatbi" in conn_string
+        assert "test_db" in conn_string
 
     def test_build_mysql_connection_string(self):
         """Test building MySQL connection string."""
         config = {
             "TYPE": "MySQL",
-            "HOST": "111.rwlb.rds.aliyuncs.com",
-            "USER": "bi_ro",
+            "HOST": "test-instance.rds.aliyuncs.com",
+            "USER": "test_user",
             "PASSWORD": "test_pass",
-            "DB": "antigravity_prod",
+            "DB": "test_db",
         }
 
         manager = ConnectionManager()
-        conn_string = manager._build_connection_string("mysql_cn_antigravity", config)
+        conn_string = manager._build_connection_string("test_instance", config)
         
         assert conn_string is not None
         assert conn_string.startswith("mysql+pymysql://")
-        assert "antigravity_prod" in conn_string
+        assert "test_db" in conn_string
 
     def test_build_polardb_connection_string(self):
         """Test building PolarDB connection string."""
         config = {
             "TYPE": "POLARDB",
-            "HOST": "pc-111.rwlb.rds.aliyuncs.com",
+            "HOST": "test-instance.rwlb.rds.aliyuncs.com",
             "USER": "test_user",
             "PASSWORD": "test_pass",
-            "DB": "insta360_data_collection",
+            "DB": "test_db",
         }
 
         manager = ConnectionManager()
-        conn_string = manager._build_connection_string("polardb_cn_insta360", config)
+        conn_string = manager._build_connection_string("test_instance", config)
         
         assert conn_string is not None
         assert conn_string.startswith("mysql+pymysql://")
@@ -210,15 +210,15 @@ class TestMultiInstanceConfiguration:
         """Test building Redshift connection string."""
         config = {
             "TYPE": "REDSHIFT",
-            "HOST": "default-workgroup.111.eu-central-1.redshift-serverless.amazonaws.com",
+            "HOST": "test-workgroup.test-region.redshift-serverless.amazonaws.com",
             "PORT": "5439",
-            "DB": "avbu",
-            "USER": "admin",
+            "DB": "test_db",
+            "USER": "test_user",
             "PASSWORD": "test_pass",
         }
 
         manager = ConnectionManager()
-        conn_string = manager._build_connection_string("redshift_eu_avbu", config)
+        conn_string = manager._build_connection_string("test_instance", config)
         
         assert conn_string is not None
         assert conn_string.startswith("redshift+redshift_connector://")
@@ -247,11 +247,11 @@ class TestMultiInstanceConfiguration:
             # Legacy format
             "MYSQL_CONNECTION": "mysql+pymysql://user:pass@host/db",
             # Multi-instance format
-            "MAXCOMPUTE_HK_BDW_TYPE": "MAXCOMPUTE",
-            "MAXCOMPUTE_HK_BDW_PROJECT": "bit_data_warehouse",
-            "MAXCOMPUTE_HK_BDW_ACCESSID": "test_id",
-            "MAXCOMPUTE_HK_BDW_ACCESSKEY": "test_key",
-            "MAXCOMPUTE_HK_BDW_ENDPOINT": "http://service.cn-hongkong.maxcompute.aliyun.com/api",
+            "MAXCOMPUTE_REGION1_PROJECT1_TYPE": "MAXCOMPUTE",
+            "MAXCOMPUTE_REGION1_PROJECT1_PROJECT": "test_project",
+            "MAXCOMPUTE_REGION1_PROJECT1_ACCESSID": "test_id",
+            "MAXCOMPUTE_REGION1_PROJECT1_ACCESSKEY": "test_key",
+            "MAXCOMPUTE_REGION1_PROJECT1_ENDPOINT": "http://service.test-region.maxcompute.aliyun.com/api",
         }
 
         with patch.dict("os.environ", env_vars, clear=True):
@@ -261,18 +261,18 @@ class TestMultiInstanceConfiguration:
                 manager = ConnectionManager()
                 platforms = manager.list_available_platforms()
                 
-                # Should have both legacy mysql and new maxcompute_hk_bdw
+                # Should have both legacy mysql and new maxcompute instance
                 assert "mysql" in platforms
-                assert "maxcompute_hk_bdw" in platforms
+                assert "maxcompute_region1_project1" in platforms
 
     def test_incomplete_configuration_ignored(self):
         """Test that incomplete configurations are ignored."""
         env_vars = {
             # Missing ACCESSKEY
-            "MAXCOMPUTE_HK_BDW_TYPE": "MAXCOMPUTE",
-            "MAXCOMPUTE_HK_BDW_PROJECT": "bit_data_warehouse",
-            "MAXCOMPUTE_HK_BDW_ACCESSID": "test_id",
-            "MAXCOMPUTE_HK_BDW_ENDPOINT": "http://service.cn-hongkong.maxcompute.aliyun.com/api",
+            "MAXCOMPUTE_REGION1_PROJECT1_TYPE": "MAXCOMPUTE",
+            "MAXCOMPUTE_REGION1_PROJECT1_PROJECT": "test_project",
+            "MAXCOMPUTE_REGION1_PROJECT1_ACCESSID": "test_id",
+            "MAXCOMPUTE_REGION1_PROJECT1_ENDPOINT": "http://service.test-region.maxcompute.aliyun.com/api",
         }
 
         with patch.dict("os.environ", env_vars, clear=True):
@@ -284,24 +284,24 @@ class TestMultiInstanceConfiguration:
                 # Should not create engine for incomplete config
                 # Check that build_connection_string returns None
                 configs = manager._parse_multi_instance_configs()
-                conn_string = manager._build_connection_string("maxcompute_hk_bdw", configs["maxcompute_hk_bdw"])
+                conn_string = manager._build_connection_string("maxcompute_region1_project1", configs["maxcompute_region1_project1"])
                 assert conn_string is None
 
     def test_multiple_instances_same_platform(self):
         """Test multiple instances of the same platform type."""
         env_vars = {
             # First MaxCompute instance
-            "MAXCOMPUTE_HK_BDW_TYPE": "MAXCOMPUTE",
-            "MAXCOMPUTE_HK_BDW_PROJECT": "bit_data_warehouse",
-            "MAXCOMPUTE_HK_BDW_ACCESSID": "id1",
-            "MAXCOMPUTE_HK_BDW_ACCESSKEY": "key1",
-            "MAXCOMPUTE_HK_BDW_ENDPOINT": "http://service.cn-hongkong.maxcompute.aliyun.com/api",
+            "MAXCOMPUTE_REGION1_PROJECT1_TYPE": "MAXCOMPUTE",
+            "MAXCOMPUTE_REGION1_PROJECT1_PROJECT": "test_project_1",
+            "MAXCOMPUTE_REGION1_PROJECT1_ACCESSID": "test_id_1",
+            "MAXCOMPUTE_REGION1_PROJECT1_ACCESSKEY": "test_key_1",
+            "MAXCOMPUTE_REGION1_PROJECT1_ENDPOINT": "http://service.test-region-1.maxcompute.aliyun.com/api",
             # Second MaxCompute instance
-            "MAXCOMPUTE_EU_AVBU_TYPE": "MAXCOMPUTE",
-            "MAXCOMPUTE_EU_AVBU_PROJECT": "avbu",
-            "MAXCOMPUTE_EU_AVBU_ACCESSID": "id2",
-            "MAXCOMPUTE_EU_AVBU_ACCESSKEY": "key2",
-            "MAXCOMPUTE_EU_AVBU_ENDPOINT": "http://service.eu-central-1.maxcompute.aliyun.com/api",
+            "MAXCOMPUTE_REGION2_PROJECT2_TYPE": "MAXCOMPUTE",
+            "MAXCOMPUTE_REGION2_PROJECT2_PROJECT": "test_project_2",
+            "MAXCOMPUTE_REGION2_PROJECT2_ACCESSID": "test_id_2",
+            "MAXCOMPUTE_REGION2_PROJECT2_ACCESSKEY": "test_key_2",
+            "MAXCOMPUTE_REGION2_PROJECT2_ENDPOINT": "http://service.test-region-2.maxcompute.aliyun.com/api",
         }
 
         with patch.dict("os.environ", env_vars, clear=True):
@@ -312,21 +312,21 @@ class TestMultiInstanceConfiguration:
                 platforms = manager.list_available_platforms()
                 
                 # Should have both instances
-                assert "maxcompute_hk_bdw" in platforms
-                assert "maxcompute_eu_avbu" in platforms
+                assert "maxcompute_region1_project1" in platforms
+                assert "maxcompute_region2_project2" in platforms
 
     def test_ignores_invalid_platform_types(self):
         """Test that environment variables with invalid platform types are ignored."""
         env_vars = {
             # Valid platform
-            "MAXCOMPUTE_HK_BDW_TYPE": "MAXCOMPUTE",
-            "MAXCOMPUTE_HK_BDW_PROJECT": "bit_data_warehouse",
-            "MAXCOMPUTE_HK_BDW_ACCESSID": "id1",
-            "MAXCOMPUTE_HK_BDW_ACCESSKEY": "key1",
-            "MAXCOMPUTE_HK_BDW_ENDPOINT": "http://service.cn-hongkong.maxcompute.aliyun.com/api",
+            "MAXCOMPUTE_REGION1_PROJECT1_TYPE": "MAXCOMPUTE",
+            "MAXCOMPUTE_REGION1_PROJECT1_PROJECT": "test_project",
+            "MAXCOMPUTE_REGION1_PROJECT1_ACCESSID": "test_id",
+            "MAXCOMPUTE_REGION1_PROJECT1_ACCESSKEY": "test_key",
+            "MAXCOMPUTE_REGION1_PROJECT1_ENDPOINT": "http://service.test-region.maxcompute.aliyun.com/api",
             # Invalid platform type (not in VALID_TYPES)
-            "INVALID_HK_TEST_TYPE": "INVALID",
-            "INVALID_HK_TEST_PARAM": "value",
+            "INVALID_REGION_TEST_TYPE": "INVALID",
+            "INVALID_REGION_TEST_PARAM": "value",
         }
 
         with patch.dict("os.environ", env_vars, clear=True):
@@ -334,17 +334,17 @@ class TestMultiInstanceConfiguration:
             configs = manager._parse_multi_instance_configs()
             
             # Should only parse the valid maxcompute instance
-            assert "maxcompute_hk_bdw" in configs
-            assert "invalid_hk_test" not in configs
+            assert "maxcompute_region1_project1" in configs
+            assert "invalid_region_test" not in configs
 
     def test_requires_type_parameter(self):
         """Test that instances without TYPE parameter are not returned."""
         env_vars = {
             # Missing TYPE parameter
-            "MAXCOMPUTE_HK_BDW_PROJECT": "bit_data_warehouse",
-            "MAXCOMPUTE_HK_BDW_ACCESSID": "id1",
-            "MAXCOMPUTE_HK_BDW_ACCESSKEY": "key1",
-            "MAXCOMPUTE_HK_BDW_ENDPOINT": "http://service.cn-hongkong.maxcompute.aliyun.com/api",
+            "MAXCOMPUTE_REGION1_PROJECT1_PROJECT": "test_project",
+            "MAXCOMPUTE_REGION1_PROJECT1_ACCESSID": "test_id",
+            "MAXCOMPUTE_REGION1_PROJECT1_ACCESSKEY": "test_key",
+            "MAXCOMPUTE_REGION1_PROJECT1_ENDPOINT": "http://service.test-region.maxcompute.aliyun.com/api",
         }
 
         with patch.dict("os.environ", env_vars, clear=True):
@@ -352,23 +352,23 @@ class TestMultiInstanceConfiguration:
             configs = manager._parse_multi_instance_configs()
             
             # Should not return instance without TYPE parameter
-            assert "maxcompute_hk_bdw" not in configs
+            assert "maxcompute_region1_project1" not in configs
 
     def test_error_handling_continues_loading(self):
         """Test that errors in one instance don't prevent loading others."""
         env_vars = {
             # First instance (will fail)
-            "MAXCOMPUTE_HK_BDW_TYPE": "MAXCOMPUTE",
-            "MAXCOMPUTE_HK_BDW_PROJECT": "bit_data_warehouse",
-            "MAXCOMPUTE_HK_BDW_ACCESSID": "id1",
-            "MAXCOMPUTE_HK_BDW_ACCESSKEY": "key1",
-            "MAXCOMPUTE_HK_BDW_ENDPOINT": "http://service.cn-hongkong.maxcompute.aliyun.com/api",
+            "MAXCOMPUTE_REGION1_PROJECT1_TYPE": "MAXCOMPUTE",
+            "MAXCOMPUTE_REGION1_PROJECT1_PROJECT": "test_project",
+            "MAXCOMPUTE_REGION1_PROJECT1_ACCESSID": "test_id",
+            "MAXCOMPUTE_REGION1_PROJECT1_ACCESSKEY": "test_key",
+            "MAXCOMPUTE_REGION1_PROJECT1_ENDPOINT": "http://service.test-region.maxcompute.aliyun.com/api",
             # Second instance (will succeed)
-            "MYSQL_CN_TEST_TYPE": "MySQL",
-            "MYSQL_CN_TEST_HOST": "localhost",
-            "MYSQL_CN_TEST_USER": "user",
-            "MYSQL_CN_TEST_PASSWORD": "pass",
-            "MYSQL_CN_TEST_DB": "testdb",
+            "MYSQL_REGION1_TEST_TYPE": "MySQL",
+            "MYSQL_REGION1_TEST_HOST": "localhost",
+            "MYSQL_REGION1_TEST_USER": "test_user",
+            "MYSQL_REGION1_TEST_PASSWORD": "test_pass",
+            "MYSQL_REGION1_TEST_DB": "test_db",
         }
 
         with patch.dict("os.environ", env_vars, clear=True):
@@ -380,4 +380,4 @@ class TestMultiInstanceConfiguration:
                 platforms = manager.list_available_platforms()
                 
                 # MySQL instance should succeed even though MaxCompute failed
-                assert "mysql_cn_test" in platforms
+                assert "mysql_region1_test" in platforms

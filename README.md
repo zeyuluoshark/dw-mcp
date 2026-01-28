@@ -65,64 +65,64 @@ This format allows configuring multiple instances of the same platform type usin
 
 **MaxCompute/DataWorks Examples**:
 ```bash
-# MAXCOMPUTE:bit_data_warehouse_hk
-export MAXCOMPUTE_HK_BDW_TYPE="MAXCOMPUTE"
-export MAXCOMPUTE_HK_BDW_PROJECT="bit_data_warehouse"
-export MAXCOMPUTE_HK_BDW_ACCESSID="your_access_id"
-export MAXCOMPUTE_HK_BDW_ACCESSKEY="your_access_key"
-export MAXCOMPUTE_HK_BDW_ENDPOINT="http://service.cn-hongkong.maxcompute.aliyun.com/api"
+# MAXCOMPUTE:example_project_region1
+export MAXCOMPUTE_REGION1_PROJECT1_TYPE="MAXCOMPUTE"
+export MAXCOMPUTE_REGION1_PROJECT1_PROJECT="example_project_name"
+export MAXCOMPUTE_REGION1_PROJECT1_ACCESSID="<your_access_id>"
+export MAXCOMPUTE_REGION1_PROJECT1_ACCESSKEY="<your_access_key>"
+export MAXCOMPUTE_REGION1_PROJECT1_ENDPOINT="http://service.<region>.maxcompute.aliyun.com/api"
 
-# DATAWORKS:avbu_eu (DataWorks projects map to MaxCompute)
-export DATAWORKS_EU_AVBU_TYPE="DATAWORKS"
-export DATAWORKS_EU_AVBU_PROJECT="avbu"
-export DATAWORKS_EU_AVBU_ACCESSID="your_access_id"
-export DATAWORKS_EU_AVBU_ACCESSKEY="your_access_key"
-export DATAWORKS_EU_AVBU_ENDPOINT="http://service.eu-central-1.maxcompute.aliyun.com/api"
+# DATAWORKS:example_project_region2 (DataWorks projects map to MaxCompute)
+export DATAWORKS_REGION2_PROJECT2_TYPE="DATAWORKS"
+export DATAWORKS_REGION2_PROJECT2_PROJECT="example_project_name_2"
+export DATAWORKS_REGION2_PROJECT2_ACCESSID="<your_access_id>"
+export DATAWORKS_REGION2_PROJECT2_ACCESSKEY="<your_access_key>"
+export DATAWORKS_REGION2_PROJECT2_ENDPOINT="http://service.<region2>.maxcompute.aliyun.com/api"
 ```
 
 **Hologres Examples**:
 ```bash
-# HOLOGRES:chatbi
-export HOLO_HK_CHATBI_TYPE="HOLOGRES"
-export HOLO_HK_CHATBI_HOST="hgpostcn-cn-11-cn-hongkong.hologres.aliyuncs.com"
-export HOLO_HK_CHATBI_USER="BASIC\$chatbi"
-export HOLO_HK_CHATBI_PASSWORD="your_password"
-export HOLO_HK_CHATBI_DBNAME="chatbi"
-export HOLO_HK_CHATBI_PORT="80"
+# HOLOGRES:example_db
+export HOLO_REGION1_DB1_TYPE="HOLOGRES"
+export HOLO_REGION1_DB1_HOST="<your-instance>.hologres.aliyuncs.com"
+export HOLO_REGION1_DB1_USER="<your_user>"
+export HOLO_REGION1_DB1_PASSWORD="<your_password>"
+export HOLO_REGION1_DB1_DBNAME="<your_database>"
+export HOLO_REGION1_DB1_PORT="80"
 ```
 
 **MySQL/PolarDB Examples**:
 ```bash
-# POLARDB:insta360_data_collection
-export POLARDB_CN_INSTA360_TYPE="POLARDB"
-export POLARDB_CN_INSTA360_HOST="pc-111.rwlb.rds.aliyuncs.com"
-export POLARDB_CN_INSTA360_USER="your_user"
-export POLARDB_CN_INSTA360_PASSWORD="your_password"
-export POLARDB_CN_INSTA360_DB="insta360_data_collection"
+# POLARDB:example_db
+export POLARDB_REGION1_DB1_TYPE="POLARDB"
+export POLARDB_REGION1_DB1_HOST="<your-instance>.rwlb.rds.aliyuncs.com"
+export POLARDB_REGION1_DB1_USER="<your_user>"
+export POLARDB_REGION1_DB1_PASSWORD="<your_password>"
+export POLARDB_REGION1_DB1_DB="<your_database>"
 
-# MYSQL:antigravity_prod_cn
-export MYSQL_CN_ANTIGRAVITY_TYPE="MySQL"
-export MYSQL_CN_ANTIGRAVITY_HOST="111.rwlb.rds.aliyuncs.com"
-export MYSQL_CN_ANTIGRAVITY_USER="bi_ro"
-export MYSQL_CN_ANTIGRAVITY_PASSWORD="your_password"
-export MYSQL_CN_ANTIGRAVITY_DB="antigravity_prod"
+# MYSQL:example_db
+export MYSQL_REGION1_DB1_TYPE="MySQL"
+export MYSQL_REGION1_DB1_HOST="<your-instance>.rds.aliyuncs.com"
+export MYSQL_REGION1_DB1_USER="<your_user>"
+export MYSQL_REGION1_DB1_PASSWORD="<your_password>"
+export MYSQL_REGION1_DB1_DB="<your_database>"
 ```
 
 **Redshift Examples**:
 ```bash
-# REDSHIFT:avbu_eu
-export REDSHIFT_EU_AVBU_TYPE="REDSHIFT"
-export REDSHIFT_EU_AVBU_HOST="default-workgroup.111.eu-central-1.redshift-serverless.amazonaws.com"
-export REDSHIFT_EU_AVBU_PORT="5439"
-export REDSHIFT_EU_AVBU_DB="avbu"
-export REDSHIFT_EU_AVBU_USER="admin"
-export REDSHIFT_EU_AVBU_PASSWORD="your_password"
+# REDSHIFT:example_cluster
+export REDSHIFT_REGION1_CLUSTER1_TYPE="REDSHIFT"
+export REDSHIFT_REGION1_CLUSTER1_HOST="<your-workgroup>.<region>.redshift-serverless.amazonaws.com"
+export REDSHIFT_REGION1_CLUSTER1_PORT="5439"
+export REDSHIFT_REGION1_CLUSTER1_DB="<your_database>"
+export REDSHIFT_REGION1_CLUSTER1_USER="<your_user>"
+export REDSHIFT_REGION1_CLUSTER1_PASSWORD="<your_password>"
 ```
 
 **Benefits of Multi-Instance Format**:
 - Support multiple instances of the same platform type
 - Clearer separation of configuration parameters
-- Each instance gets a unique identifier (e.g., `maxcompute_hk_bdw`, `hologres_social_media`)
+- Each instance gets a unique identifier (e.g., `maxcompute_region1_project1`, `holo_region1_db1`)
 - Better organization for complex multi-region/multi-project setups
 
 **Note**: Both formats can be used simultaneously. Not all platforms need to be configured. The server will only enable tools for platforms with valid connection strings.
