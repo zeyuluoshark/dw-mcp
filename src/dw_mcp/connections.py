@@ -2,12 +2,16 @@
 
 import os
 import re
+import logging
 from typing import Optional, Dict, Any
 from enum import Enum
 from urllib.parse import quote_plus
 import sqlalchemy
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 
 class Platform(str, Enum):
@@ -36,13 +40,16 @@ class ConnectionManager:
             Dictionary mapping instance keys to their configuration parameters.
             Example: {'maxcompute_hk_bdw': {'TYPE': 'MAXCOMPUTE', 'PROJECT': 'bit_data_warehouse', ...}}
         """
+        # Valid platform types that we recognize
+        VALID_TYPES = {'MAXCOMPUTE', 'DATAWORKS', 'HOLOGRES', 'MYSQL', 'POLARDB', 'REDSHIFT', 'HOLO'}
+        
         configs = {}
         env_vars = os.environ
         
         # Pattern: {TYPE}_{REGION}_{PROJECT}_{PARAM}
         # Examples: MAXCOMPUTE_HK_BDW_TYPE, DATAWORKS_EU_AVBU_PROJECT, POLARDB_CN_INSTA360_DB etc.
         # Type: uppercase letters
-        # Region: uppercase letters
+        # Region: uppercase letters and digits
         # Project: uppercase letters, digits, underscores (but not ending with underscore before param)
         # Param: uppercase letters and underscores
         pattern = re.compile(r'^([A-Z]+)_([A-Z0-9]+)_([A-Z0-9_]+?)_([A-Z_]+)$')
@@ -52,6 +59,10 @@ class ConnectionManager:
             if match:
                 type_prefix, region, project, param = match.groups()
                 
+                # Only process if type_prefix is a valid platform type
+                if type_prefix not in VALID_TYPES:
+                    continue
+                
                 # Create instance key: lowercase type_region_project
                 instance_key = f"{type_prefix.lower()}_{region.lower()}_{project.lower()}"
                 
@@ -60,13 +71,16 @@ class ConnectionManager:
                 
                 configs[instance_key][param] = value
                 
-                # Also store the type prefix for platform mapping
-                if param == 'TYPE':
-                    configs[instance_key]['_TYPE_PREFIX'] = type_prefix
-                    configs[instance_key]['_REGION'] = region
-                    configs[instance_key]['_PROJECT_KEY'] = project
+                # Store metadata in a nested dict to avoid conflicts
+                if '_metadata' not in configs[instance_key]:
+                    configs[instance_key]['_metadata'] = {}
+                
+                configs[instance_key]['_metadata']['type_prefix'] = type_prefix
+                configs[instance_key]['_metadata']['region'] = region
+                configs[instance_key]['_metadata']['project_key'] = project
         
-        return configs
+        # Only return instances that have a TYPE parameter
+        return {k: v for k, v in configs.items() if 'TYPE' in v}
 
     def _build_connection_string(self, instance_key: str, config: Dict[str, str]) -> Optional[str]:
         """
@@ -180,7 +194,7 @@ class ConnectionManager:
                     self._engines[instance_key] = create_engine(conn_string, echo=False)
                 except Exception as e:
                     # Log error but continue loading other connections
-                    print(f"Warning: Failed to create engine for {instance_key}: {e}")
+                    logger.warning(f"Failed to create engine for {instance_key}: {e}")
 
     def get_engine(self, platform: str) -> Optional[Engine]:
         """Get database engine for specified platform."""

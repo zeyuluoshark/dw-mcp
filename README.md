@@ -77,9 +77,7 @@ export DATAWORKS_EU_AVBU_TYPE="DATAWORKS"
 export DATAWORKS_EU_AVBU_PROJECT="avbu"
 export DATAWORKS_EU_AVBU_ACCESSID="your_access_id"
 export DATAWORKS_EU_AVBU_ACCESSKEY="your_access_key"
-export DATAWORKS_EU_AVBU_REGION="eu-central-1"
-export DATAWORKS_EU_AVBU_PROJECTID="190422"
-export DATAWORKS_EU_AVBU_ENV="PROD"
+export DATAWORKS_EU_AVBU_ENDPOINT="http://service.eu-central-1.maxcompute.aliyun.com/api"
 ```
 
 **Hologres Examples**:

@@ -314,3 +314,70 @@ class TestMultiInstanceConfiguration:
                 # Should have both instances
                 assert "maxcompute_hk_bdw" in platforms
                 assert "maxcompute_eu_avbu" in platforms
+
+    def test_ignores_invalid_platform_types(self):
+        """Test that environment variables with invalid platform types are ignored."""
+        env_vars = {
+            # Valid platform
+            "MAXCOMPUTE_HK_BDW_TYPE": "MAXCOMPUTE",
+            "MAXCOMPUTE_HK_BDW_PROJECT": "bit_data_warehouse",
+            "MAXCOMPUTE_HK_BDW_ACCESSID": "id1",
+            "MAXCOMPUTE_HK_BDW_ACCESSKEY": "key1",
+            "MAXCOMPUTE_HK_BDW_ENDPOINT": "http://service.cn-hongkong.maxcompute.aliyun.com/api",
+            # Invalid platform type (not in VALID_TYPES)
+            "INVALID_HK_TEST_TYPE": "INVALID",
+            "INVALID_HK_TEST_PARAM": "value",
+        }
+
+        with patch.dict("os.environ", env_vars, clear=True):
+            manager = ConnectionManager()
+            configs = manager._parse_multi_instance_configs()
+            
+            # Should only parse the valid maxcompute instance
+            assert "maxcompute_hk_bdw" in configs
+            assert "invalid_hk_test" not in configs
+
+    def test_requires_type_parameter(self):
+        """Test that instances without TYPE parameter are not returned."""
+        env_vars = {
+            # Missing TYPE parameter
+            "MAXCOMPUTE_HK_BDW_PROJECT": "bit_data_warehouse",
+            "MAXCOMPUTE_HK_BDW_ACCESSID": "id1",
+            "MAXCOMPUTE_HK_BDW_ACCESSKEY": "key1",
+            "MAXCOMPUTE_HK_BDW_ENDPOINT": "http://service.cn-hongkong.maxcompute.aliyun.com/api",
+        }
+
+        with patch.dict("os.environ", env_vars, clear=True):
+            manager = ConnectionManager()
+            configs = manager._parse_multi_instance_configs()
+            
+            # Should not return instance without TYPE parameter
+            assert "maxcompute_hk_bdw" not in configs
+
+    def test_error_handling_continues_loading(self):
+        """Test that errors in one instance don't prevent loading others."""
+        env_vars = {
+            # First instance (will fail)
+            "MAXCOMPUTE_HK_BDW_TYPE": "MAXCOMPUTE",
+            "MAXCOMPUTE_HK_BDW_PROJECT": "bit_data_warehouse",
+            "MAXCOMPUTE_HK_BDW_ACCESSID": "id1",
+            "MAXCOMPUTE_HK_BDW_ACCESSKEY": "key1",
+            "MAXCOMPUTE_HK_BDW_ENDPOINT": "http://service.cn-hongkong.maxcompute.aliyun.com/api",
+            # Second instance (will succeed)
+            "MYSQL_CN_TEST_TYPE": "MySQL",
+            "MYSQL_CN_TEST_HOST": "localhost",
+            "MYSQL_CN_TEST_USER": "user",
+            "MYSQL_CN_TEST_PASSWORD": "pass",
+            "MYSQL_CN_TEST_DB": "testdb",
+        }
+
+        with patch.dict("os.environ", env_vars, clear=True):
+            with patch('src.dw_mcp.connections.create_engine') as mock_create_engine:
+                # First call raises error, second succeeds
+                mock_create_engine.side_effect = [Exception("Test error"), MagicMock()]
+                
+                manager = ConnectionManager()
+                platforms = manager.list_available_platforms()
+                
+                # MySQL instance should succeed even though MaxCompute failed
+                assert "mysql_cn_test" in platforms
