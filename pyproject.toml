@@ -11,6 +11,8 @@ dependencies = [
     "pymysql>=1.1.0",
     "psycopg2-binary>=2.9.0",
     "redshift-connector>=2.0.0",
+    "sqlalchemy-redshift>=0.8.0",
+    "pyodps>=0.11.0",
 ]
 
 [project.optional-dependencies]

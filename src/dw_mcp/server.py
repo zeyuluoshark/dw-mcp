@@ -3,6 +3,7 @@
 
 import asyncio
 import json
+import sys
 from typing import Any
 from mcp.server import Server
 from mcp.types import (
@@ -15,9 +16,14 @@ from mcp.types import (
 )
 import mcp.server.stdio
 
+from .config_loader import load_env_file
 from .connections import ConnectionManager
 from .safety import SQLSafetyChecker
 from .dialects import SQLDialectHelper
+from .startup_checks import run_startup_checks
+
+# Try to load .env file (env vars take precedence)
+load_env_file()
 
 # Initialize connection manager
 conn_manager = ConnectionManager()
@@ -350,6 +356,11 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
 
 async def main():
     """Run the MCP server."""
+    # Run startup checks
+    if not run_startup_checks(conn_manager):
+        print("\n❌ Startup checks failed. Please fix the issues above and try again.")
+        sys.exit(1)
+    
     async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
         await app.run(read_stream, write_stream, app.create_initialization_options())
 
