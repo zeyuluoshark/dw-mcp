@@ -36,10 +36,12 @@ pip install -r requirements.txt
 
 ### Configuration
 
-Configure database connections using environment variables:
+Configure database connections using environment variables. Two formats are supported:
+
+#### Legacy Format (Single Connection String)
 
 ```bash
-# MaxCompute (example format - adjust based on actual connector)
+# MaxCompute
 export MAXCOMPUTE_CONNECTION="maxcompute://access_id:access_key@endpoint/project"
 
 # Hologres (PostgreSQL-compatible)
@@ -55,7 +57,77 @@ export POLARDB_CONNECTION="mysql+pymysql://user:password@host:port/database"
 export REDSHIFT_CONNECTION="redshift+redshift_connector://user:password@host:port/database"
 ```
 
-**Note**: Not all platforms need to be configured. The server will only enable tools for platforms with valid connection strings.
+#### Multi-Instance Format (Recommended)
+
+This format allows configuring multiple instances of the same platform type using individual parameters.
+
+**Pattern**: `{TYPE}_{REGION}_{PROJECT}_{PARAM}`
+
+**MaxCompute/DataWorks Examples**:
+```bash
+# MAXCOMPUTE:bit_data_warehouse_hk
+export MAXCOMPUTE_HK_BDW_TYPE="MAXCOMPUTE"
+export MAXCOMPUTE_HK_BDW_PROJECT="bit_data_warehouse"
+export MAXCOMPUTE_HK_BDW_ACCESSID="your_access_id"
+export MAXCOMPUTE_HK_BDW_ACCESSKEY="your_access_key"
+export MAXCOMPUTE_HK_BDW_ENDPOINT="http://service.cn-hongkong.maxcompute.aliyun.com/api"
+
+# DATAWORKS:avbu_eu (DataWorks projects map to MaxCompute)
+export DATAWORKS_EU_AVBU_TYPE="DATAWORKS"
+export DATAWORKS_EU_AVBU_PROJECT="avbu"
+export DATAWORKS_EU_AVBU_ACCESSID="your_access_id"
+export DATAWORKS_EU_AVBU_ACCESSKEY="your_access_key"
+export DATAWORKS_EU_AVBU_REGION="eu-central-1"
+export DATAWORKS_EU_AVBU_PROJECTID="190422"
+export DATAWORKS_EU_AVBU_ENV="PROD"
+```
+
+**Hologres Examples**:
+```bash
+# HOLOGRES:chatbi
+export HOLO_HK_CHATBI_TYPE="HOLOGRES"
+export HOLO_HK_CHATBI_HOST="hgpostcn-cn-11-cn-hongkong.hologres.aliyuncs.com"
+export HOLO_HK_CHATBI_USER="BASIC\$chatbi"
+export HOLO_HK_CHATBI_PASSWORD="your_password"
+export HOLO_HK_CHATBI_DBNAME="chatbi"
+export HOLO_HK_CHATBI_PORT="80"
+```
+
+**MySQL/PolarDB Examples**:
+```bash
+# POLARDB:insta360_data_collection
+export POLARDB_CN_INSTA360_TYPE="POLARDB"
+export POLARDB_CN_INSTA360_HOST="pc-111.rwlb.rds.aliyuncs.com"
+export POLARDB_CN_INSTA360_USER="your_user"
+export POLARDB_CN_INSTA360_PASSWORD="your_password"
+export POLARDB_CN_INSTA360_DB="insta360_data_collection"
+
+# MYSQL:antigravity_prod_cn
+export MYSQL_CN_ANTIGRAVITY_TYPE="MySQL"
+export MYSQL_CN_ANTIGRAVITY_HOST="111.rwlb.rds.aliyuncs.com"
+export MYSQL_CN_ANTIGRAVITY_USER="bi_ro"
+export MYSQL_CN_ANTIGRAVITY_PASSWORD="your_password"
+export MYSQL_CN_ANTIGRAVITY_DB="antigravity_prod"
+```
+
+**Redshift Examples**:
+```bash
+# REDSHIFT:avbu_eu
+export REDSHIFT_EU_AVBU_TYPE="REDSHIFT"
+export REDSHIFT_EU_AVBU_HOST="default-workgroup.111.eu-central-1.redshift-serverless.amazonaws.com"
+export REDSHIFT_EU_AVBU_PORT="5439"
+export REDSHIFT_EU_AVBU_DB="avbu"
+export REDSHIFT_EU_AVBU_USER="admin"
+export REDSHIFT_EU_AVBU_PASSWORD="your_password"
+```
+
+**Benefits of Multi-Instance Format**:
+- Support multiple instances of the same platform type
+- Clearer separation of configuration parameters
+- Each instance gets a unique identifier (e.g., `maxcompute_hk_bdw`, `hologres_social_media`)
+- Better organization for complex multi-region/multi-project setups
+
+**Note**: Both formats can be used simultaneously. Not all platforms need to be configured. The server will only enable tools for platforms with valid connection strings.
 
 ## Usage
 

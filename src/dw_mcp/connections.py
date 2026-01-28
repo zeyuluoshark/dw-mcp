@@ -1,8 +1,10 @@
 """Database connection management for different data platforms."""
 
 import os
+import re
 from typing import Optional, Dict, Any
 from enum import Enum
+from urllib.parse import quote_plus
 import sqlalchemy
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
@@ -16,6 +18,7 @@ class Platform(str, Enum):
     MYSQL = "mysql"
     POLARDB = "polardb"
     REDSHIFT = "redshift"
+    DATAWORKS = "dataworks"  # DataWorks maps to MaxCompute
 
 
 class ConnectionManager:
@@ -25,8 +28,119 @@ class ConnectionManager:
         self._engines: Dict[str, Engine] = {}
         self._load_connections()
 
+    def _parse_multi_instance_configs(self) -> Dict[str, Dict[str, str]]:
+        """
+        Parse environment variables with pattern {TYPE}_{REGION}_{PROJECT}_{PARAM}.
+        
+        Returns:
+            Dictionary mapping instance keys to their configuration parameters.
+            Example: {'maxcompute_hk_bdw': {'TYPE': 'MAXCOMPUTE', 'PROJECT': 'bit_data_warehouse', ...}}
+        """
+        configs = {}
+        env_vars = os.environ
+        
+        # Pattern: {TYPE}_{REGION}_{PROJECT}_{PARAM}
+        # Examples: MAXCOMPUTE_HK_BDW_TYPE, DATAWORKS_EU_AVBU_PROJECT, POLARDB_CN_INSTA360_DB etc.
+        # Type: uppercase letters
+        # Region: uppercase letters
+        # Project: uppercase letters, digits, underscores (but not ending with underscore before param)
+        # Param: uppercase letters and underscores
+        pattern = re.compile(r'^([A-Z]+)_([A-Z0-9]+)_([A-Z0-9_]+?)_([A-Z_]+)$')
+        
+        for key, value in env_vars.items():
+            match = pattern.match(key)
+            if match:
+                type_prefix, region, project, param = match.groups()
+                
+                # Create instance key: lowercase type_region_project
+                instance_key = f"{type_prefix.lower()}_{region.lower()}_{project.lower()}"
+                
+                if instance_key not in configs:
+                    configs[instance_key] = {}
+                
+                configs[instance_key][param] = value
+                
+                # Also store the type prefix for platform mapping
+                if param == 'TYPE':
+                    configs[instance_key]['_TYPE_PREFIX'] = type_prefix
+                    configs[instance_key]['_REGION'] = region
+                    configs[instance_key]['_PROJECT_KEY'] = project
+        
+        return configs
+
+    def _build_connection_string(self, instance_key: str, config: Dict[str, str]) -> Optional[str]:
+        """
+        Build a connection string from configuration parameters.
+        
+        Args:
+            instance_key: Instance identifier (e.g., 'maxcompute_hk_bdw')
+            config: Configuration dictionary with parameters
+            
+        Returns:
+            Connection string or None if invalid configuration
+        """
+        platform_type = config.get('TYPE', '').upper()
+        
+        if platform_type in ('MAXCOMPUTE', 'DATAWORKS'):
+            # MaxCompute/DataWorks format: maxcompute://access_id:access_key@endpoint/project
+            access_id = config.get('ACCESSID')
+            access_key = config.get('ACCESSKEY')
+            project = config.get('PROJECT')
+            endpoint = config.get('ENDPOINT')
+            
+            if access_id and access_key and project and endpoint:
+                # URL encode credentials to handle special characters
+                encoded_id = quote_plus(access_id)
+                encoded_key = quote_plus(access_key)
+                # Remove http:// or https:// from endpoint for the connection string
+                endpoint_clean = endpoint.replace('http://', '').replace('https://', '')
+                return f"maxcompute://{encoded_id}:{encoded_key}@{endpoint_clean}/{project}"
+        
+        elif platform_type == 'HOLOGRES':
+            # Hologres format: postgresql://user:password@host:port/database
+            host = config.get('HOST')
+            user = config.get('USER')
+            password = config.get('PASSWORD')
+            db = config.get('DBNAME') or config.get('DB')
+            port = config.get('PORT', '80')
+            
+            if host and user and password and db:
+                # URL encode credentials
+                encoded_user = quote_plus(user)
+                encoded_pass = quote_plus(password)
+                return f"postgresql://{encoded_user}:{encoded_pass}@{host}:{port}/{db}"
+        
+        elif platform_type in ('MYSQL', 'POLARDB'):
+            # MySQL/PolarDB format: mysql+pymysql://user:password@host:port/database
+            host = config.get('HOST')
+            user = config.get('USER')
+            password = config.get('PASSWORD')
+            db = config.get('DB')
+            port = config.get('PORT', '3306')
+            
+            if host and user and password and db:
+                encoded_user = quote_plus(user)
+                encoded_pass = quote_plus(password)
+                return f"mysql+pymysql://{encoded_user}:{encoded_pass}@{host}:{port}/{db}"
+        
+        elif platform_type == 'REDSHIFT':
+            # Redshift format: redshift+redshift_connector://user:password@host:port/database
+            host = config.get('HOST')
+            user = config.get('USER')
+            password = config.get('PASSWORD')
+            db = config.get('DB')
+            port = config.get('PORT', '5439')
+            
+            if host and user and password and db:
+                encoded_user = quote_plus(user)
+                encoded_pass = quote_plus(password)
+                return f"redshift+redshift_connector://{encoded_user}:{encoded_pass}@{host}:{port}/{db}"
+        
+        return None
+
     def _load_connections(self):
         """Load connection strings from environment variables."""
+        # Load legacy format (single CONNECTION env vars)
         # MaxCompute connection
         if os.getenv("MAXCOMPUTE_CONNECTION"):
             self._engines[Platform.MAXCOMPUTE] = create_engine(
@@ -54,6 +168,19 @@ class ConnectionManager:
             self._engines[Platform.REDSHIFT] = create_engine(
                 os.getenv("REDSHIFT_CONNECTION"), echo=False
             )
+        
+        # Load new format (multi-instance configs)
+        multi_configs = self._parse_multi_instance_configs()
+        
+        for instance_key, config in multi_configs.items():
+            conn_string = self._build_connection_string(instance_key, config)
+            
+            if conn_string:
+                try:
+                    self._engines[instance_key] = create_engine(conn_string, echo=False)
+                except Exception as e:
+                    # Log error but continue loading other connections
+                    print(f"Warning: Failed to create engine for {instance_key}: {e}")
 
     def get_engine(self, platform: str) -> Optional[Engine]:
         """Get database engine for specified platform."""
