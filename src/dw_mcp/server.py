@@ -3,13 +3,11 @@
 
 import asyncio
 import json
-from typing import Any, Optional
+from typing import Any
 from mcp.server import Server
 from mcp.types import (
     Tool,
     TextContent,
-    ImageContent,
-    EmbeddedResource,
     GetPromptResult,
     Prompt,
     PromptArgument,
@@ -17,10 +15,9 @@ from mcp.types import (
 )
 import mcp.server.stdio
 
-from .connections import ConnectionManager, Platform
+from .connections import ConnectionManager
 from .safety import SQLSafetyChecker
 from .dialects import SQLDialectHelper
-
 
 # Initialize connection manager
 conn_manager = ConnectionManager()
@@ -85,7 +82,7 @@ async def get_prompt(name: str, arguments: dict[str, str] | None) -> GetPromptRe
     if name == "explain-schema":
         platform = arguments.get("platform", "") if arguments else ""
         table = arguments.get("table", "") if arguments else ""
-        
+
         return GetPromptResult(
             description=f"Explaining schema for {table} on {platform}",
             messages=[
@@ -98,10 +95,10 @@ async def get_prompt(name: str, arguments: dict[str, str] | None) -> GetPromptRe
                 )
             ],
         )
-    
+
     elif name == "data-lineage":
         table = arguments.get("table", "") if arguments else ""
-        
+
         return GetPromptResult(
             description=f"Explaining data lineage for {table}",
             messages=[
@@ -114,11 +111,11 @@ async def get_prompt(name: str, arguments: dict[str, str] | None) -> GetPromptRe
                 )
             ],
         )
-    
+
     elif name == "query-optimization":
         platform = arguments.get("platform", "") if arguments else ""
         query = arguments.get("query", "") if arguments else ""
-        
+
         return GetPromptResult(
             description=f"Optimizing query for {platform}",
             messages=[
@@ -131,7 +128,7 @@ async def get_prompt(name: str, arguments: dict[str, str] | None) -> GetPromptRe
                 )
             ],
         )
-    
+
     raise ValueError(f"Unknown prompt: {name}")
 
 
@@ -246,10 +243,10 @@ async def list_tools() -> list[Tool]:
 @app.call_tool()
 async def call_tool(name: str, arguments: Any) -> list[TextContent]:
     """Handle tool calls."""
-    
+
     if name == "list_platforms":
         platforms = conn_manager.list_available_platforms()
-        
+
         if not platforms:
             response = {
                 "available_platforms": [],
@@ -259,117 +256,102 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
                     "HOLOGRES_CONNECTION",
                     "MYSQL_CONNECTION",
                     "POLARDB_CONNECTION",
-                    "REDSHIFT_CONNECTION"
-                ]
+                    "REDSHIFT_CONNECTION",
+                ],
             }
         else:
             platform_details = []
             for p in platforms:
                 info = SQLDialectHelper.get_platform_info(p)
-                platform_details.append({
-                    "platform": p,
-                    "name": info.get("name"),
-                    "type": info.get("type"),
-                    "description": info.get("description")
-                })
-            
-            response = {
-                "available_platforms": platforms,
-                "details": platform_details
-            }
-        
+                platform_details.append(
+                    {
+                        "platform": p,
+                        "name": info.get("name"),
+                        "type": info.get("type"),
+                        "description": info.get("description"),
+                    }
+                )
+
+            response = {"available_platforms": platforms, "details": platform_details}
+
         return [TextContent(type="text", text=json.dumps(response, indent=2))]
-    
+
     elif name == "get_platform_info":
         platform = arguments.get("platform")
         info = SQLDialectHelper.get_platform_info(platform)
-        
+
         return [TextContent(type="text", text=json.dumps(info, indent=2))]
-    
+
     elif name == "execute_query":
         platform = arguments.get("platform")
         query = arguments.get("query")
         limit = arguments.get("limit", 100)
         allow_destructive = arguments.get("allow_destructive", False)
-        
+
         # Validate query first
         is_valid, processed_query, message = SQLSafetyChecker.validate_query(
-            query,
-            allow_destructive=allow_destructive,
-            auto_limit=True,
-            default_limit=limit
+            query, allow_destructive=allow_destructive, auto_limit=True, default_limit=limit
         )
-        
+
         if not is_valid:
-            response = {
-                "success": False,
-                "error": message,
-                "query": query
-            }
+            response = {"success": False, "error": message, "query": query}
             return [TextContent(type="text", text=json.dumps(response, indent=2))]
-        
+
         # Execute query
         result = conn_manager.execute_query(platform, processed_query, limit=None)
-        
+
         # Format output
         formatted = SQLDialectHelper.format_query_results(result, format_type="table")
-        
+
         return [
             TextContent(type="text", text=formatted),
-            TextContent(type="text", text=f"\n\nRaw JSON:\n{json.dumps(result, indent=2, default=str)}")
+            TextContent(
+                type="text", text=f"\n\nRaw JSON:\n{json.dumps(result, indent=2, default=str)}"
+            ),
         ]
-    
+
     elif name == "validate_query":
         query = arguments.get("query")
         allow_destructive = arguments.get("allow_destructive", False)
-        
+
         is_valid, processed_query, message = SQLSafetyChecker.validate_query(
-            query,
-            allow_destructive=allow_destructive,
-            auto_limit=True
+            query, allow_destructive=allow_destructive, auto_limit=True
         )
-        
+
         response = {
             "valid": is_valid,
             "message": message,
             "original_query": query,
             "processed_query": processed_query if is_valid else None,
             "is_select": SQLSafetyChecker.is_select_query(query),
-            "is_destructive": SQLSafetyChecker.is_destructive(query)[0]
+            "is_destructive": SQLSafetyChecker.is_destructive(query)[0],
         }
-        
+
         return [TextContent(type="text", text=json.dumps(response, indent=2))]
-    
+
     elif name == "get_schema_info":
         platform = arguments.get("platform")
         schema = arguments.get("schema")
-        
+
         result = conn_manager.get_schema_info(platform, schema)
-        
+
         return [TextContent(type="text", text=json.dumps(result, indent=2, default=str))]
-    
+
     elif name == "get_example_queries":
         platform = arguments.get("platform")
         examples = SQLDialectHelper.get_example_queries(platform)
-        
-        response = {
-            "platform": platform,
-            "examples": examples
-        }
-        
+
+        response = {"platform": platform, "examples": examples}
+
         return [TextContent(type="text", text=json.dumps(response, indent=2))]
-    
+
     raise ValueError(f"Unknown tool: {name}")
 
 
 async def main():
     """Run the MCP server."""
     async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
-        await app.run(
-            read_stream,
-            write_stream,
-            app.create_initialization_options()
-        )
+        await app.run(read_stream, write_stream, app.create_initialization_options())
 
 
 if __name__ == "__main__":

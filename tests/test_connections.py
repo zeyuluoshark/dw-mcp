@@ -1,7 +1,6 @@
 """Tests for connection manager."""
 
-import pytest
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 from src.dw_mcp.connections import ConnectionManager, Platform
 
 
@@ -10,7 +9,7 @@ class TestConnectionManager:
 
     def test_list_available_platforms_empty(self):
         """Test listing platforms when none are configured."""
-        with patch.dict('os.environ', {}, clear=True):
+        with patch.dict("os.environ", {}, clear=True):
             manager = ConnectionManager()
             platforms = manager.list_available_platforms()
             assert platforms == []
@@ -21,8 +20,8 @@ class TestConnectionManager:
             "MYSQL_CONNECTION": "mysql+pymysql://user:pass@host/db",
             "HOLOGRES_CONNECTION": "postgresql://user:pass@host/db",
         }
-        
-        with patch.dict('os.environ', env_vars, clear=True):
+
+        with patch.dict("os.environ", env_vars, clear=True):
             manager = ConnectionManager()
             platforms = manager.list_available_platforms()
             assert Platform.MYSQL in platforms
@@ -30,16 +29,16 @@ class TestConnectionManager:
 
     def test_get_engine_not_configured(self):
         """Test getting engine for non-configured platform."""
-        with patch.dict('os.environ', {}, clear=True):
+        with patch.dict("os.environ", {}, clear=True):
             manager = ConnectionManager()
             engine = manager.get_engine(Platform.MYSQL)
             assert engine is None
 
     def test_execute_query_platform_not_configured(self):
         """Test executing query on non-configured platform."""
-        with patch.dict('os.environ', {}, clear=True):
+        with patch.dict("os.environ", {}, clear=True):
             manager = ConnectionManager()
             result = manager.execute_query(Platform.MYSQL, "SELECT 1")
-            
+
             assert result["success"] is False
             assert "not configured" in result["error"]
