@@ -20,23 +20,69 @@ This MCP server acts as a data warehouse engineering assistant with access to mu
 - ✅ **Schema exploration** - Browse database schemas, tables, and columns
 - ✅ **Query validation** - Validate SQL queries before execution
 - ✅ **Read-only by default** - Requires explicit confirmation for any destructive operations
+- ✅ **Auto-fix configuration** - Automatically detects and fixes common configuration issues
+- ✅ **Startup checks** - Validates Python version and dependencies on startup
+- ✅ **Friendly error messages** - Clear error messages with actionable solutions
+- ✅ **.env file support** - Load configuration from .env files
 
-## Installation
+## Quick Start
 
-### Prerequisites
+### One-Click Setup
+
+The easiest way to get started is with the setup script:
+
+```bash
+# Clone the repository
+cd dw-mcp
+
+# Run the one-click setup script
+./setup.sh
+
+# The script will:
+# 1. Check for Python 3.10+
+# 2. Create a virtual environment (optional)
+# 3. Install all dependencies
+# 4. Create a .env file from .env.example
+# 5. Validate the setup
+```
+
+### Manual Installation
+
+### Manual Installation
+
+#### Prerequisites
 
 - Python 3.10 or higher
 - pip
 
-### Install Dependencies
+**Note**: The server will automatically detect your Python version on startup and provide helpful error messages if your version is too old.
+
+#### Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
+The server will check for all required dependencies on startup and display clear error messages if any are missing.
+
 ### Configuration
 
-Configure database connections using environment variables. Two formats are supported:
+Configure database connections using environment variables or a `.env` file. Two formats are supported:
+
+**Option 1: .env File (Recommended)**
+
+Create a `.env` file in the project root (copy from `.env.example`):
+
+```bash
+cp .env.example .env
+# Edit .env with your credentials
+```
+
+The server will automatically load the `.env` file on startup. Environment variables take precedence over `.env` file values.
+
+**Option 2: Environment Variables**
+
+Set environment variables directly in your shell or profile.
 
 #### Legacy Format (Single Connection String)
 
@@ -127,12 +173,130 @@ export REDSHIFT_REGION1_CLUSTER1_PASSWORD="<your_password>"
 
 **Note**: Both formats can be used simultaneously. Not all platforms need to be configured. The server will only enable tools for platforms with valid connection strings.
 
+### Auto-Fix Configuration
+
+The server automatically detects and fixes common configuration issues on startup:
+
+1. **Missing DATAWORKS ENDPOINT**: Automatically generates the endpoint URL from the REGION parameter
+   ```bash
+   # You provide:
+   export DATAWORKS_HK_BDW_REGION="cn-hongkong"
+   
+   # Server auto-generates:
+   # DATAWORKS_HK_BDW_ENDPOINT="http://service.cn-hongkong.maxcompute.aliyun.com/api"
+   ```
+
+2. **Missing HOLOGRES TYPE**: Automatically adds TYPE=HOLOGRES when HOST is present
+   ```bash
+   # You provide:
+   export HOLO_HK_CHATBI_HOST="instance.hologres.aliyuncs.com"
+   
+   # Server auto-adds:
+   # HOLO_HK_CHATBI_TYPE="HOLOGRES"
+   ```
+
+3. **Incorrect TYPE Case**: Automatically fixes lowercase type names to uppercase
+   ```bash
+   # You provide:
+   export REDSHIFT_EU_AVBU_TYPE="redshift"
+   
+   # Server auto-fixes to:
+   # REDSHIFT_EU_AVBU_TYPE="REDSHIFT"
+   ```
+
+The server will display all auto-fixes applied during startup.
+
 ## Usage
 
 ### Running the Server
 
 ```bash
 python -m src.dw_mcp.server
+```
+
+**Startup Checks**
+
+The server performs automatic checks on startup:
+- ✅ **Python Version**: Verifies Python 3.10+ is installed
+- ✅ **Dependencies**: Checks all required packages are installed
+- ✅ **Configuration**: Auto-fixes common configuration issues
+- ✅ **Platform Status**: Displays all configured platform instances
+
+**Example Startup Output**:
+
+```
+Running startup checks...
+
+✓ Python version: 3.12.3
+✓ All dependencies installed
+
+Checking configuration...
+⚠️  Configuration issues detected and auto-fixed:
+   ✓ Generated DATAWORKS_HK_BDW_ENDPOINT
+   ✓ Added HOLO_HK_CHATBI_TYPE=HOLOGRES
+   ✓ Fixed REDSHIFT_EU_AVBU_TYPE (lowercase → REDSHIFT)
+
+======================================================================
+MCP Server Started Successfully! 🚀
+======================================================================
+
+Configured Platform Instances (9):
+
+  DATAWORKS:
+    ✓ dataworks_cn_avbu
+    ✓ dataworks_eu_avbu
+    ✓ dataworks_hk_bdw
+
+  HOLOGRES:
+    ✓ holo_hk_chatbi
+
+  MAXCOMPUTE:
+    ✓ maxcompute_cn_avbu
+    ✓ maxcompute_eu_avbu
+    ✓ maxcompute_hk_bdw
+
+  MYSQL:
+    ✓ mysql_cn_antigravity
+
+  POLARDB:
+    ✓ polardb_cn_insta360
+
+Server is waiting for MCP client connections...
+======================================================================
+```
+
+**Error Handling**
+
+If there are issues, the server provides clear, actionable error messages:
+
+```bash
+# Python version too low
+❌ Python version too low
+   Current: 3.9.6
+   Required: >=3.10
+
+Solutions:
+1. Install Python 3.10+:
+   macOS: brew install python@3.10
+   Ubuntu: sudo apt install python3.10
+   
+2. Or use pyenv:
+   pyenv install 3.10.0
+   pyenv local 3.10.0
+```
+
+```bash
+# Missing dependencies
+❌ Missing dependencies:
+   - pyodps>=0.11.0
+   - sqlalchemy-redshift>=0.8.0
+
+Solutions:
+1. Install missing dependencies:
+   pip install pyodps>=0.11.0 sqlalchemy-redshift>=0.8.0
+
+2. Or install all dependencies:
+   pip install -r requirements.txt
 ```
 
 Or use it with an MCP client that supports stdio communication.
