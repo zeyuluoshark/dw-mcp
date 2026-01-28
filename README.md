@@ -36,10 +36,12 @@ pip install -r requirements.txt
 
 ### Configuration
 
-Configure database connections using environment variables:
+Configure database connections using environment variables. Two formats are supported:
+
+#### Legacy Format (Single Connection String)
 
 ```bash
-# MaxCompute (example format - adjust based on actual connector)
+# MaxCompute
 export MAXCOMPUTE_CONNECTION="maxcompute://access_id:access_key@endpoint/project"
 
 # Hologres (PostgreSQL-compatible)
@@ -55,7 +57,75 @@ export POLARDB_CONNECTION="mysql+pymysql://user:password@host:port/database"
 export REDSHIFT_CONNECTION="redshift+redshift_connector://user:password@host:port/database"
 ```
 
-**Note**: Not all platforms need to be configured. The server will only enable tools for platforms with valid connection strings.
+#### Multi-Instance Format (Recommended)
+
+This format allows configuring multiple instances of the same platform type using individual parameters.
+
+**Pattern**: `{TYPE}_{REGION}_{PROJECT}_{PARAM}`
+
+**MaxCompute/DataWorks Examples**:
+```bash
+# MAXCOMPUTE:example_project_region1
+export MAXCOMPUTE_REGION1_PROJECT1_TYPE="MAXCOMPUTE"
+export MAXCOMPUTE_REGION1_PROJECT1_PROJECT="example_project_name"
+export MAXCOMPUTE_REGION1_PROJECT1_ACCESSID="<your_access_id>"
+export MAXCOMPUTE_REGION1_PROJECT1_ACCESSKEY="<your_access_key>"
+export MAXCOMPUTE_REGION1_PROJECT1_ENDPOINT="http://service.<region>.maxcompute.aliyun.com/api"
+
+# DATAWORKS:example_project_region2 (DataWorks projects map to MaxCompute)
+export DATAWORKS_REGION2_PROJECT2_TYPE="DATAWORKS"
+export DATAWORKS_REGION2_PROJECT2_PROJECT="example_project_name_2"
+export DATAWORKS_REGION2_PROJECT2_ACCESSID="<your_access_id>"
+export DATAWORKS_REGION2_PROJECT2_ACCESSKEY="<your_access_key>"
+export DATAWORKS_REGION2_PROJECT2_ENDPOINT="http://service.<region2>.maxcompute.aliyun.com/api"
+```
+
+**Hologres Examples**:
+```bash
+# HOLOGRES:example_db
+export HOLO_REGION1_DB1_TYPE="HOLOGRES"
+export HOLO_REGION1_DB1_HOST="<your-instance>.hologres.aliyuncs.com"
+export HOLO_REGION1_DB1_USER="<your_user>"
+export HOLO_REGION1_DB1_PASSWORD="<your_password>"
+export HOLO_REGION1_DB1_DBNAME="<your_database>"
+export HOLO_REGION1_DB1_PORT="80"
+```
+
+**MySQL/PolarDB Examples**:
+```bash
+# POLARDB:example_db
+export POLARDB_REGION1_DB1_TYPE="POLARDB"
+export POLARDB_REGION1_DB1_HOST="<your-instance>.rwlb.rds.aliyuncs.com"
+export POLARDB_REGION1_DB1_USER="<your_user>"
+export POLARDB_REGION1_DB1_PASSWORD="<your_password>"
+export POLARDB_REGION1_DB1_DB="<your_database>"
+
+# MYSQL:example_db
+export MYSQL_REGION1_DB1_TYPE="MySQL"
+export MYSQL_REGION1_DB1_HOST="<your-instance>.rds.aliyuncs.com"
+export MYSQL_REGION1_DB1_USER="<your_user>"
+export MYSQL_REGION1_DB1_PASSWORD="<your_password>"
+export MYSQL_REGION1_DB1_DB="<your_database>"
+```
+
+**Redshift Examples**:
+```bash
+# REDSHIFT:example_cluster
+export REDSHIFT_REGION1_CLUSTER1_TYPE="REDSHIFT"
+export REDSHIFT_REGION1_CLUSTER1_HOST="<your-workgroup>.<region>.redshift-serverless.amazonaws.com"
+export REDSHIFT_REGION1_CLUSTER1_PORT="5439"
+export REDSHIFT_REGION1_CLUSTER1_DB="<your_database>"
+export REDSHIFT_REGION1_CLUSTER1_USER="<your_user>"
+export REDSHIFT_REGION1_CLUSTER1_PASSWORD="<your_password>"
+```
+
+**Benefits of Multi-Instance Format**:
+- Support multiple instances of the same platform type
+- Clearer separation of configuration parameters
+- Each instance gets a unique identifier (e.g., `maxcompute_region1_project1`, `holo_region1_db1`)
+- Better organization for complex multi-region/multi-project setups
+
+**Note**: Both formats can be used simultaneously. Not all platforms need to be configured. The server will only enable tools for platforms with valid connection strings.
 
 ## Usage
 
